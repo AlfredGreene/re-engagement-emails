@@ -1,23 +1,11 @@
 <?php
 
-// Instateate database
-$mysqli = require('./database.php');
+// Instantiate targets library
+require('./targets.library.php');
+$targets = new Joelvardy\Targets();
 
-// Select targets from table
-$targets = array();
-$before = ($_SERVER['REQUEST_TIME'] - (60 * 60));
-$stmt = $mysqli->prepare('select id, added, ip, email from `targets` where added < ?');
-$stmt->bind_param('i', $before);
-$stmt->execute();
-$stmt->bind_result($id, $added, $ip, $email);
-while($stmt->fetch()) {
-	$targets[$id] = (object) array(
-		'added' => $added,
-		'ip' => $ip,
-		'email' => $email
-	);
-}
-$stmt->close();
+// Read targets
+$targets = $targets->read();
 
 // Iterate through targets
 foreach ($targets as $target_id => $target) {
@@ -37,10 +25,6 @@ foreach ($targets as $target_id => $target) {
 		// Log errors, you want to make sure the emails are actually sent!
 	}
 
-	// TODO: Have this code in a library so you can use it here and in the remove-target.php action
-	$stmt = $mysqli->prepare('delete from `targets` where email = ?');
-	$stmt->bind_param('s', $target->email);
-	$stmt->execute(); // You probably want to log errors here because otherwise the user will keep being sent re-engagement emails
-	$stmt->close();
+	$targets->delete($target->email); // Add some logging for errors (if the user isn't removed from the table they will keep recieving emails)
 
 }
