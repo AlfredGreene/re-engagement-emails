@@ -13,7 +13,7 @@ Zepto(function($){
 
 			$.post('./add-target.php', { email: event.target.value }, function(response){
 				// We don't really care what the response is.
-			})
+			});
 
 		}
 
